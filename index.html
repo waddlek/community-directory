@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <base target="_top">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        color: #252525;
+        line-height: 1.5;
+        margin: 0;
+        padding: 16px;
+        background: #ffffff;
+      }
+      .directory { max-width: 900px; margin: 0 auto; } 
+      
+      #directory-content {
+        max-height: none;
+        overflow: visible;
+      }      
+      .person {
+        padding: 20px 0;
+        border-bottom: 1px solid #dddddd;
+      }
+      .person h2 {
+        font-size: 1.2rem;
+        margin: 0 0 4px;
+      }
+      .pronouns {
+        color: #555555;
+        font-size: 0.95rem;
+      }
+      .position {
+        margin-top: 8px;
+      }
+      .interests {
+        margin-top: 4px;
+        margin-left: 20px;
+      }
+      .climate, .links {
+        margin-top: 8px;
+        font-size: 0.95rem;
+      }
+      .links a {
+        margin-right: 14px;
+        overflow-wrap: anywhere;
+      }
+      .message {
+        color: #555555;
+        padding: 20px 0;
+      }
+      .legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px 20px;
+        margin: 0 0 16px;
+        padding: 12px;
+        border: 1px solid #dddddd;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        }
+
+        .legend-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        }
+
+        .legend-item svg {
+        width: 20px;
+        height: 20px;
+        flex-shrink: 0;
+      }
+
+    </style>
+  </head>
+  <body>
+  <main class="directory">
+    <div class="legend">
+  
+  <div class="legend-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"
+         aria-hidden="true">
+      <path d="M8 11V5.5a1.5 1.5 0 0 1 3 0V10"></path>
+      <path d="M11 9V4.5a1.5 1.5 0 0 1 3 0V10"></path>
+      <path d="M14 9.5V6a1.5 1.5 0 0 1 3 0v7"></path>
+      <path d="M8 10.5a1.5 1.5 0 0 0-3 0V15c0 4 2.5 6 6 6h3a6 6 0 0 0 6-6v-2a1.5 1.5 0 0 0-3 0"></path>
+    </svg>
+    <span>Comfortable answering workplace climate questions</span>
+  </div>
+
+  <div class="legend-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
+         aria-hidden="true">
+      <rect x="3" y="5" width="18" height="14" rx="2"></rect>
+      <path d="m3 7 9 6 9-6"></path>
+    </svg>
+    <span>Click to copy email</span>
+  </div>
+
+  <div class="legend-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
+         aria-hidden="true">
+      <circle cx="12" cy="12" r="10"></circle>
+      <path d="M2 12h20 M12 2a15 15 0 0 1 0 20 M12 2a15 15 0 0 0 0 20"></path>
+    </svg>
+    <span>Visit website</span>
+  </div>
+
+  
+</div>
+
+<div id="directory-content" class="message">
+  Loading directory…
+</div>
+
+  </main></body>
+
+
+
+<script>
+  const content = document.getElementById('directory-content');
+
+  function addText(parent, tag, text, className) {
+    if (!text) return;
+    const element = document.createElement(tag);
+    element.textContent = text;
+    if (className) element.className = className;
+    parent.appendChild(element);
+  }
+
+  function addLink(parent, label, url) {
+    if (!url) return;
+
+    let safeUrl;
+    try {
+      safeUrl = new URL(url);
+    } catch (error) {
+      return;
+    }
+
+    if (safeUrl.protocol !== 'https:' &&
+        safeUrl.protocol !== 'http:') {
+      return;
+    }
+
+    const link = document.createElement('a');
+    link.href = safeUrl.href;
+    link.textContent = label;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    parent.appendChild(link);
+  }
+
+  function renderDirectory(people) {
+    content.replaceChildren();
+
+    if (!people || people.length === 0) {
+    content.textContent = 'No published entries yet.';
+    return;
+    }
+
+    people.sort((a, b) =>
+    (a.lastName + a.firstName).localeCompare(
+    b.lastName + b.firstName
+    )
+    );
+
+    function makeIconLink(label, href, type) {
+    const link = document.createElement('a');
+    link.href = type === 'website' ? href : '#';
+    link.title = label;
+    link.setAttribute('aria-label', label);
+    link.style.display = 'inline-flex';
+    link.style.alignItems = 'center';
+    link.style.color = 'inherit';
+    link.style.cursor = 'pointer';
+    link.style.flexShrink = '0';
+
+    if (type === 'website') {
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+    } else {
+      link.addEventListener('click', async function(event) {
+        event.preventDefault();
+
+        try {
+          await navigator.clipboard.writeText(href);
+
+          let notice = document.getElementById('copy-notice');
+
+          if (!notice) {
+            notice = document.createElement('span');
+            notice.id = 'copy-notice';
+            notice.style.marginLeft = '6px';
+            notice.style.fontSize = '0.85rem';
+            notice.setAttribute('role', 'status');
+            link.parentNode.appendChild(notice);
+          }
+
+          notice.textContent = 'Email copied';
+        } catch (error) {
+          window.prompt('Copy this email address:', href);
+        }
+      });
+    }
+
+    const ns = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(ns, 'svg');
+    svg.setAttribute('width', '20');
+    svg.setAttribute('height', '20');
+    svg.setAttribute('viewBox', '0 0 24 24');
+    svg.setAttribute('fill', 'none');
+    svg.setAttribute('stroke', 'currentColor');
+    svg.setAttribute('stroke-width', '1.8');
+    svg.setAttribute('stroke-linecap', 'round');
+    svg.setAttribute('stroke-linejoin', 'round');
+    svg.setAttribute('aria-hidden', 'true');
+
+    if (type === 'email') {
+      const rect = document.createElementNS(ns, 'rect');
+      rect.setAttribute('x', '3');
+      rect.setAttribute('y', '5');
+      rect.setAttribute('width', '18');
+      rect.setAttribute('height', '14');
+      rect.setAttribute('rx', '2');
+      svg.appendChild(rect);
+
+      const path = document.createElementNS(ns, 'path');
+      path.setAttribute('d', 'm3 7 9 6 9-6');
+      svg.appendChild(path);
+    } else {
+      const circle = document.createElementNS(ns, 'circle');
+      circle.setAttribute('cx', '12');
+      circle.setAttribute('cy', '12');
+      circle.setAttribute('r', '10');
+      svg.appendChild(circle);
+
+      const path = document.createElementNS(ns, 'path');
+      path.setAttribute(
+        'd',
+        'M2 12h20 M12 2a15 15 0 0 1 0 20 M12 2a15 15 0 0 0 0 20'
+      );
+      svg.appendChild(path);
+    }
+
+    link.appendChild(svg);
+    return link;
+
+    }
+
+    people.forEach(person => {
+    const card = document.createElement('section');
+    card.style.display = 'flex';
+    card.style.alignItems = 'flex-start';
+    card.style.gap = '16px';
+    card.className = 'person';
+
+    const firstLine = document.createElement('div');
+    firstLine.style.display = 'flex';
+    firstLine.style.alignItems = 'center';
+    firstLine.style.lineHeight = '1.4';
+    firstLine.style.flexWrap = 'wrap';
+    firstLine.style.columnGap = '12px';
+    firstLine.style.rowGap = '6px';
+
+    const nameGroup = document.createElement('div');
+    nameGroup.style.display = 'inline-flex';
+    nameGroup.style.alignItems = 'baseline';
+    nameGroup.style.gap = '5px';
+
+    const name = document.createElement('strong');
+    name.textContent = [
+      person.firstName,
+      person.lastName
+    ].filter(Boolean).join(' ');
+    nameGroup.appendChild(name);
+
+    if (person.pronouns) {
+      const pronouns = document.createElement('span');
+      pronouns.className = 'pronouns';
+      pronouns.textContent = '(' + person.pronouns + ')';
+      nameGroup.appendChild(pronouns);
+    }
+
+    firstLine.appendChild(nameGroup);
+
+    if (person.photoUrl) {
+      const photo = document.createElement('img');
+      photo.src = person.photoUrl;
+      photo.onerror = function() {
+      console.error('Photo failed to load:', person.photoUrl);
+      };
+      photo.onload = function() {
+        console.log('Photo loaded:', person.photoUrl);
+      };
+      photo.alt = 'Photo of ' + [
+        person.firstName,
+        person.lastName
+      ].filter(Boolean).join(' ');
+      photo.loading = 'lazy';
+      photo.style.width = '72px';
+      photo.style.height = '72px';
+      photo.style.objectFit = 'cover';
+      photo.style.borderRadius = '50%';
+      photo.style.flexShrink = '0';
+      photo.style.marginTop = '0';
+      card.appendChild(photo);
+    }
+
+    const entryText = document.createElement('div');
+    entryText.style.flex = '1';
+    entryText.style.minWidth = '0';
+
+
+    if (person.position) {
+      const position = document.createElement('span');
+      position.className = 'position';
+      position.style.margin = '0';
+      position.textContent = person.position;
+      firstLine.appendChild(position);
+    }
+
+    const answer = String(person.climateAnswer || '')
+      .trim()
+      .toLowerCase();
+
+    if (
+      answer === 'yes' ||
+      answer.startsWith('yes,') ||
+      answer.startsWith('yes ')
+    ) {
+      const hand = document.createElement('span');
+      hand.className = 'climate';
+      hand.style.margin = '0';
+      hand.style.lineHeight = '1';
+      hand.title = 'Comfortable answering climate-related questions';
+      hand.setAttribute('aria-label', 'Comfortable answering climate-related questions');
+      hand.style.display = 'inline-flex';
+      hand.style.alignItems = 'center';
+      hand.style.flexShrink = '0';
+
+      const svgNS = 'http://www.w3.org/2000/svg';
+      const svg = document.createElementNS(svgNS, 'svg');
+
+      svg.setAttribute('width', '22');
+      svg.setAttribute('height', '22');
+      svg.setAttribute('viewBox', '0 0 24 24');
+      svg.setAttribute('fill', 'none');
+      svg.setAttribute('stroke', 'currentColor');
+      svg.setAttribute('stroke-width', '1.7');
+      svg.setAttribute('stroke-linecap', 'round');
+      svg.setAttribute('stroke-linejoin', 'round');
+      svg.setAttribute('aria-hidden', 'true');
+
+      const paths = [
+        'M8 11V5.5a1.5 1.5 0 0 1 3 0V10',
+        'M11 9V4.5a1.5 1.5 0 0 1 3 0V10',
+        'M14 9.5V6a1.5 1.5 0 0 1 3 0v7',
+        'M8 10.5a1.5 1.5 0 0 0-3 0V15c0 4 2.5 6 6 6h3a6 6 0 0 0 6-6v-2a1.5 1.5 0 0 0-3 0'
+      ];
+
+      paths.forEach(function(d) {
+        const path = document.createElementNS(svgNS, 'path');
+        path.setAttribute('d', d);
+        svg.appendChild(path);
+      });
+
+      hand.appendChild(svg);
+      firstLine.appendChild(hand);
+    }
+
+    if (person.publicEmail) {
+      firstLine.appendChild(
+        makeIconLink('Email', person.publicEmail, 'email')
+      );
+    }
+
+    if (person.website) {
+      try {
+        const url = new URL(person.website);
+
+        if (url.protocol === 'https:' || url.protocol === 'http:') {
+          firstLine.appendChild(
+            makeIconLink('Website', url.href, 'website')
+          );
+        }
+      } catch (error) {
+        // Ignore invalid website addresses.
+      }
+    }
+
+    entryText.appendChild(firstLine);
+
+    if (person.mathematicalInterests) {
+      const interests = document.createElement('div');
+      interests.className = 'interests';
+      interests.style.marginTop = '4px';
+      interests.textContent = person.mathematicalInterests;
+      entryText.appendChild(interests);
+    }
+
+    card.appendChild(entryText);
+
+    content.appendChild(card);
+
+    });
+    }
+
+
+  const DIRECTORY_URL =
+  'https://waddlek.github.io/community-directory/directory.json';
+
+fetch(DIRECTORY_URL)
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Directory request failed: ' + response.status);
+    }
+    return response.json();
+  })
+  .then(people => {
+    renderDirectory(people);
+  })
+  .catch(error => {
+    content.textContent =
+      'The directory could not be loaded. Please try again later.';
+    console.error(error);
+  });
+</script>
+
+
+  </body>
+</html>

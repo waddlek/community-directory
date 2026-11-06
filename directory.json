@@ -1,16 +1,5 @@
 [
   {
-    "firstName": "Katie",
-    "lastName": "Waddle",
-    "pronouns": "she/her",
-    "position": "postdoc, Leibniz University Hannover",
-    "mathematicalInterests": "frieze patterns, cluster algebras, graph tubings, q,t-Catalan numbers",
-    "climateAnswer": "Yes",
-    "publicEmail": "waddle@umich.edu",
-    "website": "https://sites.google.com/view/katie-waddle/home",
-    "photoUrl": "https://drive.google.com/thumbnail?id=1-INRYbczie5bnYTf9JP4OtWNdeTdgohq&sz=w400"
-  },
-  {
     "firstName": "Angela",
     "lastName": "Hicks",
     "pronouns": "",
@@ -20,5 +9,16 @@
     "publicEmail": "",
     "website": "https://www.lehigh.edu/~anh316/index.html",
     "photoUrl": "https://drive.google.com/thumbnail?id=1xWWxS8LH7r5llnuVz-lrLVzofG6dFD1J&sz=w400"
+  },
+  {
+    "firstName": "Katie",
+    "lastName": "Waddle",
+    "pronouns": "she/her",
+    "position": "postdoc, Leibniz University Hannover",
+    "mathematicalInterests": "frieze patterns, cluster algebras, graph tubings, q,t-Catalan numbers",
+    "climateAnswer": "Yes",
+    "publicEmail": "waddle@umich.edu",
+    "website": "https://sites.google.com/view/katie-waddle/home",
+    "photoUrl": ""
   }
 ]
